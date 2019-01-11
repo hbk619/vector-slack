@@ -1,0 +1,3 @@
+slackclient==v1.3.0
+anki_vector==v0.5.1
+parameterized==v0.6.1
