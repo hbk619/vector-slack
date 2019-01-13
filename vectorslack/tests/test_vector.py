@@ -1,5 +1,6 @@
 import unittest
 from vectorslack import vector
+from vectorslack.command_parser import CommandParser
 from parameterized import parameterized
 from unittest.mock import Mock, patch
 import anki_vector
@@ -57,7 +58,6 @@ class TestVector(unittest.TestCase):
         self.assertEqual(message, expected_message)
 
     def test_parse_command(self):
-
         expected_events = [
             (
                 "say hi",
@@ -75,16 +75,56 @@ class TestVector(unittest.TestCase):
 
     @patch('time.sleep')
     @patch('vectorslack.vector.slack_connected')
-    def test_start(self, mock_slack_connected, mock_time99):
+    @patch('vectorslack.vector.create_command_parser')
+    @patch('vectorslack.vector.handle_command')
+    def test_start(self, mock_handle_command, mock_create_command, mock_slack_connected, mock_time):
         mock_slack = Mock(spec=SlackClient)
         mock_slack_connected.side_effect = [True, False]
         mock_slack.rtm_read.return_value = events
+
+        mock_command_parser = Mock(spec=CommandParser)
+        mock_create_command.return_value = mock_command_parser
 
         mock_vector = Mock(spec=anki_vector.Robot)
 
         vector.start("VectorBot", mock_slack, mock_vector)
 
-        self.assertEqual(mock_slack.api_call.call_count, 2)
+        self.assertEqual(mock_handle_command.call_count, 2)
+        mock_create_command.assert_called_with(mock_vector)
+
+    def test_handle_command_say(self):
+        mock_command_parser = Mock(spec=CommandParser)
+        mock_slack = Mock(spec=SlackClient)
+
+        vector.handle_command("say hello there", "1234", "vectorbot", mock_slack, mock_command_parser)
+
+        mock_command_parser.say.assert_called_with("hello there")
+
+        mock_slack.api_call.assert_called_with(
+            "chat.postMessage",
+            channel="1234",
+            text="vectorbot is a go go"
+        )
+
+    def test_handle_command_move(self):
+        mock_command_parser = Mock(spec=CommandParser)
+        mock_slack = Mock(spec=SlackClient)
+
+        vector.handle_command("move forward", "1234", "vectorbot", mock_slack, mock_command_parser)
+
+        mock_command_parser.move.assert_called_with("forward")
+
+    def test_handle_command_invalid_posts_to_slack(self):
+        mock_command_parser = Mock(spec=CommandParser)
+        mock_slack = Mock(spec=SlackClient)
+
+        vector.handle_command("utter garbage", "1234", "vectorbot", mock_slack, mock_command_parser)
+
+        mock_slack.api_call.assert_called_with(
+            "chat.postMessage",
+            channel="1234",
+            text="I'm not sure what you mean."
+        )
 
 
 if __name__ == '__main__':

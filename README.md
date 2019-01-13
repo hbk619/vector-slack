@@ -1,3 +1,9 @@
+## Possible commands
+
+    say <message>
+    show <image name>
+    show <image name> for <number> seconds
+
 ## Requirements
 
 Python 3.6 (for Vector)
