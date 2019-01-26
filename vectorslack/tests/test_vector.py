@@ -90,7 +90,7 @@ class TestVector(unittest.TestCase):
         vector.start("VectorBot", mock_slack, mock_vector)
 
         self.assertEqual(mock_handle_command.call_count, 2)
-        mock_create_command.assert_called_with(mock_vector)
+        mock_create_command.assert_called_with(mock_vector, mock_slack)
 
     def test_handle_command_say(self):
         mock_command_parser = Mock(spec=CommandParser)
@@ -98,7 +98,7 @@ class TestVector(unittest.TestCase):
 
         vector.handle_command("say hello there", "1234", "vectorbot", mock_slack, mock_command_parser)
 
-        mock_command_parser.say.assert_called_with("hello there")
+        mock_command_parser.say.assert_called_with(channel="1234", command="hello there")
 
         mock_slack.api_call.assert_called_with(
             "chat.postMessage",
@@ -112,7 +112,15 @@ class TestVector(unittest.TestCase):
 
         vector.handle_command("move forward", "1234", "vectorbot", mock_slack, mock_command_parser)
 
-        mock_command_parser.move.assert_called_with("forward")
+        mock_command_parser.move.assert_called_with(channel="1234", command="forward")
+
+    def test_handle_command_whats_going_on(self):
+        mock_command_parser = Mock(spec=CommandParser)
+        mock_slack = Mock(spec=SlackClient)
+
+        vector.handle_command("whatsgoingon", "1234", "vectorbot", mock_slack, mock_command_parser)
+
+        mock_command_parser.whatsgoingon.assert_called_with(channel="1234", command="")
 
     def test_handle_command_invalid_posts_to_slack(self):
         mock_command_parser = Mock(spec=CommandParser)
