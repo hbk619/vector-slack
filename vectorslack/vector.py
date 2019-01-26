@@ -26,7 +26,7 @@ def slack_connected(slack_client):
 def parse_events(botname, slack_client, command_parser):
     events = parse_bot_commands(slack_client.rtm_read(), botname)
     for event in events:
-        handle_command(event[1], event[0], botname, slack_client, command_parser)
+        handle_command(event[0], event[1], botname, slack_client, command_parser)
 
 
 def parse_bot_commands(slack_events, botname):
