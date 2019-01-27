@@ -59,7 +59,7 @@ class TestSay(unittest.TestCase):
         mock_image = Mock(spec=Image.Image)
         self.mock_robot.camera.latest_image = mock_image
 
-        self.parser.whatsgoingon(channel="1234")
+        self.parser.whats_going_on(channel="1234")
 
         mock_image.save.assert_called_with(mock_bytes_io(), "PNG")
 

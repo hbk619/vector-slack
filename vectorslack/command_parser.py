@@ -31,7 +31,7 @@ class CommandParser:
         screen_data = screen.convert_image_to_screen_data(image_file)
         self.robot.screen.set_screen_with_image_data(screen_data, duration or DEFAULT_IMAGE_TIME)
 
-    def whatsgoingon(self, **kwargs):
+    def whats_going_on(self, **kwargs):
         image = self.robot.camera.latest_image
 
         content = io.BytesIO()
@@ -44,4 +44,4 @@ class CommandParser:
                                    as_user=True)
 
 
-SUPPORTED_COMMANDS = [i for i in dir(CommandParser) if not i.startswith('__')]
+SUPPORTED_COMMANDS = {item.replace('_', ' '): item for item in dir(CommandParser) if not item.startswith('__')}.items()

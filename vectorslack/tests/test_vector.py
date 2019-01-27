@@ -1,10 +1,12 @@
 import unittest
+from unittest.mock import Mock, patch
+
+import anki_vector
+from parameterized import parameterized
+from slackclient import SlackClient
+
 from vectorslack import vector
 from vectorslack.command_parser import CommandParser
-from parameterized import parameterized
-from unittest.mock import Mock, patch
-import anki_vector
-from slackclient import SlackClient
 
 events = [
     {
@@ -118,9 +120,9 @@ class TestVector(unittest.TestCase):
         mock_command_parser = Mock(spec=CommandParser)
         mock_slack = Mock(spec=SlackClient)
 
-        vector.handle_command("whatsgoingon", "1234", "vectorbot", mock_slack, mock_command_parser)
+        vector.handle_command("whats going on", "1234", "vectorbot", mock_slack, mock_command_parser)
 
-        mock_command_parser.whatsgoingon.assert_called_with(channel="1234", command="")
+        mock_command_parser.whats_going_on.assert_called_with(channel="1234", command="")
 
     def test_handle_command_invalid_posts_to_slack(self):
         mock_command_parser = Mock(spec=CommandParser)

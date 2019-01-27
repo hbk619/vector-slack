@@ -1,6 +1,7 @@
-import time
 import re
-from vectorslack.command_parser import CommandParser
+import time
+
+from vectorslack.command_parser import CommandParser, SUPPORTED_COMMANDS
 
 RTM_READ_DELAY = 1
 
@@ -56,13 +57,14 @@ def handle_command(message, channel, botname, slack_client, command_parser):
 
     response = None
 
-    command = message.split(' ')[0]
-    message_contents = message.replace(command, '', 1).strip()
-
     try:
-        getattr(command_parser, command)(command=message_contents, channel=channel)
+        command, attribute_name = next((key, value) for key, value in SUPPORTED_COMMANDS if message.startswith(key))
+
+        message_contents = message.replace(command, '', 1).strip()
+
+        getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
         response = "%s is a go go" % botname
-    except AttributeError as e:
+    except StopIteration as e:
         print("Failed to parse command " + message)
 
     slack_client.api_call(
