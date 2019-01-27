@@ -1,3 +1,7 @@
+# WORK IN PROGRESS
+
+Integrate Slack with Anki's Vector
+
 ## Possible commands
 
     say <message>
