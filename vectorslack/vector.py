@@ -1,12 +1,13 @@
-import time
 import re
-from vectorslack.command_parser import CommandParser
+import time
+
+from vectorslack.command_parser import CommandParser, SUPPORTED_COMMANDS
 
 RTM_READ_DELAY = 1
 
 
 def start(botname, slack_client, robot):
-    command_parser = create_command_parser(robot)
+    command_parser = create_command_parser(robot, slack_client)
     if slack_client.rtm_connect():
         while slack_connected(slack_client) is True:
             parse_events(botname, slack_client, command_parser)
@@ -15,8 +16,8 @@ def start(botname, slack_client, robot):
         print("Connection Failed")
 
 
-def create_command_parser(robot):
-    return CommandParser(robot)
+def create_command_parser(robot, slack_client):
+    return CommandParser(robot, slack_client)
 
 
 def slack_connected(slack_client):
@@ -56,12 +57,14 @@ def handle_command(message, channel, botname, slack_client, command_parser):
 
     response = None
 
-    command = message.split(' ')[0]
-
     try:
-        getattr(command_parser, command)(message.replace(command, '', 1).strip())
+        command, attribute_name = next((key, value) for key, value in SUPPORTED_COMMANDS if message.startswith(key))
+
+        message_contents = message.replace(command, '', 1).strip()
+
+        getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
         response = "%s is a go go" % botname
-    except AttributeError as e:
+    except StopIteration as e:
         print("Failed to parse command " + message)
 
     slack_client.api_call(

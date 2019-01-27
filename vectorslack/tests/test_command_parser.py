@@ -1,9 +1,12 @@
 import unittest
-from vectorslack.command_parser import CommandParser
 from unittest.mock import Mock, patch
+
 import anki_vector
-from anki_vector import screen
 from PIL import Image
+from anki_vector import screen, camera
+from slackclient import SlackClient
+
+from vectorslack.command_parser import CommandParser
 
 
 class TestSay(unittest.TestCase):
@@ -11,10 +14,12 @@ class TestSay(unittest.TestCase):
     def setUp(self):
         self.mock_robot = Mock(spec=anki_vector.Robot)
         self.mock_robot.screen = Mock(spec=screen.ScreenComponent)
-        self.parser = CommandParser(self.mock_robot)
+        self.mock_robot.camera = Mock(spec=camera.CameraComponent)
+        self.mock_slack_client = Mock(spec=SlackClient)
+        self.parser = CommandParser(self.mock_robot, self.mock_slack_client)
 
     def test_say(self):
-        self.parser.say("hey mario!")
+        self.parser.say(command="hey mario!")
 
         self.mock_robot.say_text.assert_called_with("hey mario!")
 
@@ -26,7 +31,7 @@ class TestSay(unittest.TestCase):
         image_bytes = bytes()
         mock_convert_image.return_value = image_bytes
 
-        self.parser.show("heart")
+        self.parser.show(command="heart")
 
         mock_open.assert_called_with("images/heart.png")
         mock_convert_image.assert_called_with(mock_image)
@@ -41,9 +46,25 @@ class TestSay(unittest.TestCase):
         image_bytes = bytes()
         mock_convert_image.return_value = image_bytes
 
-        self.parser.show("heart for 7 seconds")
+        self.parser.show(command="heart for 7 seconds")
 
         mock_open.assert_called_with("images/heart.png")
         mock_convert_image.assert_called_with(mock_image)
 
         self.mock_robot.screen.set_screen_with_image_data.assert_called_with(image_bytes, 7.0)
+
+    @patch('io.BytesIO')
+    def test_whats_going_on(self, mock_bytes_io):
+        mock_bytes_io().getvalue.return_value = "This is a fun picture of the world"
+        mock_image = Mock(spec=Image.Image)
+        self.mock_robot.camera.latest_image = mock_image
+
+        self.parser.whats_going_on(channel="1234")
+
+        mock_image.save.assert_called_with(mock_bytes_io(), "PNG")
+
+        self.mock_slack_client.api_call.assert_called_with("files.upload",
+                                                           channels="1234",
+                                                           file="This is a fun picture of the world",
+                                                           filename="this-is-whats-happening.png",
+                                                           as_user=True)
