@@ -8,9 +8,10 @@ RTM_READ_DELAY = 1
 
 def start(botname, slack_client, robot):
     command_parser = create_command_parser(robot, slack_client)
+    starterbot_id = slack_client.api_call("auth.test")["user_id"]
     if slack_client.rtm_connect():
         while slack_connected(slack_client) is True:
-            parse_events(botname, slack_client, command_parser)
+            parse_events(starterbot_id, slack_client, command_parser)
             time.sleep(RTM_READ_DELAY)
     else:
         print("Connection Failed")
@@ -49,7 +50,7 @@ def parse_direct_mention(message_text, botname):
 
 
 def get_mention_regex(botname):
-    return "^@(%s)(.*)" % botname
+    return "^<@(%s)>(.*)" % botname
 
 
 def handle_command(message, channel, botname, slack_client, command_parser):
