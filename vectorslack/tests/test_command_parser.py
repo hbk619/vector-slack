@@ -26,7 +26,8 @@ class TestSay(unittest.TestCase):
 
     @patch('vectorslack.command_parser.screen.convert_image_to_screen_data')
     @patch('PIL.Image.open')
-    def test_show(self, mock_open, mock_convert_image):
+    @patch('os.path.realpath', return_value="test/dir/file.png")
+    def test_show(self, mock_realpath, mock_open, mock_convert_image):
         mock_image = Mock(spec=Image.Image)
         mock_open.return_value = mock_image
         image_bytes = bytes()
@@ -34,14 +35,15 @@ class TestSay(unittest.TestCase):
 
         self.parser.show(command="heart")
 
-        mock_open.assert_called_with("images/heart.png")
+        mock_open.assert_called_with("test/dir/images/heart.png")
         mock_convert_image.assert_called_with(mock_image)
 
         self.mock_robot.screen.set_screen_with_image_data.assert_called_with(image_bytes, 4.0)
 
     @patch('vectorslack.command_parser.screen.convert_image_to_screen_data')
     @patch('PIL.Image.open')
-    def test_show_with_duration(self, mock_open, mock_convert_image):
+    @patch('os.path.realpath', return_value="test/dir/file.png")
+    def test_show_with_duration(self, mock_realpath, mock_open, mock_convert_image):
         mock_image = Mock(spec=Image.Image)
         mock_open.return_value = mock_image
         image_bytes = bytes()
@@ -49,7 +51,7 @@ class TestSay(unittest.TestCase):
 
         self.parser.show(command="heart for 7 seconds")
 
-        mock_open.assert_called_with("images/heart.png")
+        mock_open.assert_called_with("test/dir/images/heart.png")
         mock_convert_image.assert_called_with(mock_image)
 
         self.mock_robot.screen.set_screen_with_image_data.assert_called_with(image_bytes, 7.0)

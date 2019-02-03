@@ -1,4 +1,6 @@
 import io
+import os
+
 import time
 from PIL import Image
 from anki_vector import screen
@@ -21,7 +23,8 @@ class CommandParser:
     def show(self, **kwargs):
         command = kwargs['command']
         split_command = command.split(' ')
-        image_file = Image.open('images/%s.png' % split_command[0])
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        image = Image.open('%s/images/%s.png' % (dir_path, split_command[0]))
         duration = None
 
         try:
@@ -29,8 +32,31 @@ class CommandParser:
         except (IndexError, TypeError):
             print("No duration specified for image. Message: '%s', using default" % command)
 
-        screen_data = screen.convert_image_to_screen_data(image_file)
+        screen_data = screen.convert_image_to_screen_data(image)
         self.robot.screen.set_screen_with_image_data(screen_data, duration or DEFAULT_IMAGE_TIME)
+
+    def play(self, **kwargs):
+        command = kwargs['command']
+        split_command = command.split(' ')
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        sheet = Image.open('%s/images/%s.png' % (dir_path, split_command[0]))
+        duration = None
+
+        try:
+            duration = float(split_command[2])
+        except (IndexError, TypeError):
+            print("No duration specified for image. Message: '%s', using default" % command)
+
+        for _ in range(3):
+            for y in range(2):
+                for x in range(5):
+                    left = x * 184
+                    right = (x+1) * 184
+                    top = y * 96
+                    bottom = (y+1) * 96
+                    image = sheet.crop((left, top, right, bottom))
+                    screen_data = screen.convert_image_to_screen_data(image)
+                    self.robot.screen.set_screen_with_image_data(screen_data, duration or DEFAULT_IMAGE_TIME)
 
     def whats_going_on(self, **kwargs):
         self.robot.behavior.drive_off_charger()

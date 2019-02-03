@@ -8,6 +8,7 @@ Integrate Slack with Anki's Vector
     show <image name>
     show <image name> for <number> seconds
     whats going on
+    play <spritesheet name>
 
 ## Requirements
 
@@ -36,3 +37,9 @@ Python 3.6 (for Vector)
     <enter all your details>
     exit
     docker run -v vector_config:/root/.anki_vector -e SLACK_TOKEN -e VECTOR_SERIAL <image id>
+    
+## Sprite sheets for animations
+
+Create a PNG sprite sheet, each sprite is 184 in width, 96 in height. Two rows of five and place in
+
+    vectorslack/images
