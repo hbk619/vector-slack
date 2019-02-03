@@ -83,14 +83,14 @@ class TestVector(unittest.TestCase):
         mock_slack = Mock(spec=SlackClient)
         mock_slack_connected.side_effect = [True, False]
         mock_slack.rtm_read.return_value = events
-        mock_slack.api_call.return_value = {"user_id": "12345"}
+        mock_slack.api_call.return_value = {"user_id": "12345", "user": "vectorbot"}
 
         mock_command_parser = Mock(spec=CommandParser)
         mock_create_command.return_value = mock_command_parser
 
         mock_vector = Mock(spec=anki_vector.Robot)
 
-        vector.start("VectorBot", mock_slack, mock_vector)
+        vector.start(mock_slack, mock_vector)
 
         self.assertEqual(mock_handle_command.call_count, 2)
         mock_create_command.assert_called_with(mock_vector, mock_slack)
