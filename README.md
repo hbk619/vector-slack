@@ -27,3 +27,12 @@ Python 3.6 (for Vector)
 ### Tests
 
     python -m unittest discover -s vectorslack/tests
+    
+## Docker
+
+    docker build .
+    docker run -v vector_config:/root/.anki_vector -ti <image id> /bin/bash
+    python3.6 -m anki_vector.configure
+    <enter all your details>
+    exit
+    docker run -v vector_config:/root/.anki_vector -e SLACK_TOKEN -e VECTOR_SERIAL <image id>
