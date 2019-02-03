@@ -57,11 +57,12 @@ def handle_command(message, channel, botname, slack_client, command_parser):
     default_response = "I'm not sure what you mean."
 
     response = None
-
+    lower_case_message = message.lower()
     try:
-        command, attribute_name = next((key, value) for key, value in SUPPORTED_COMMANDS if message.startswith(key))
+        command, attribute_name = next(
+            (key, value) for key, value in SUPPORTED_COMMANDS if lower_case_message.startswith(key))
 
-        message_contents = message.replace(command, '', 1).strip()
+        message_contents = lower_case_message.replace(command, '', 1).strip()
 
         getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
         response = "%s is a go go" % botname
