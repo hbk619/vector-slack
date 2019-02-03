@@ -8,6 +8,8 @@ Integrate Slack with Anki's Vector
     show <image name>
     show <image name> for <number> seconds
     whats going on
+    fireworks
+    giggle
 
 ## Requirements
 
