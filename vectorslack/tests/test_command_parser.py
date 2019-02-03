@@ -1,9 +1,9 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 
 import anki_vector
 from PIL import Image
-from anki_vector import screen, camera
+from anki_vector import screen, camera, behavior
 from slackclient import SlackClient
 
 from vectorslack.command_parser import CommandParser
@@ -15,6 +15,7 @@ class TestSay(unittest.TestCase):
         self.mock_robot = Mock(spec=anki_vector.Robot)
         self.mock_robot.screen = Mock(spec=screen.ScreenComponent)
         self.mock_robot.camera = Mock(spec=camera.CameraComponent)
+        self.mock_robot.behavior = Mock(spec=behavior.BehaviorComponent)
         self.mock_slack_client = Mock(spec=SlackClient)
         self.parser = CommandParser(self.mock_robot, self.mock_slack_client)
 
@@ -54,17 +55,43 @@ class TestSay(unittest.TestCase):
         self.mock_robot.screen.set_screen_with_image_data.assert_called_with(image_bytes, 7.0)
 
     @patch('io.BytesIO')
-    def test_whats_going_on(self, mock_bytes_io):
-        mock_bytes_io().getvalue.return_value = "This is a fun picture of the world"
+    @patch('time.sleep')
+    def test_whats_going_on(self, mock_time, mock_bytes_io):
+        mock_bytes_io().getvalue.side_effect = ["This is a fun picture of the world 1",
+                                                "This is a fun picture of the world 2",
+                                                "This is a fun picture of the world 3",
+                                                "This is a fun picture of the world 4"]
         mock_image = Mock(spec=Image.Image)
         self.mock_robot.camera.latest_image = mock_image
 
         self.parser.whats_going_on(channel="1234")
 
+        self.mock_robot.behavior.drive_off_charger.assert_called_once()
+
         mock_image.save.assert_called_with(mock_bytes_io(), "PNG")
 
-        self.mock_slack_client.api_call.assert_called_with("files.upload",
-                                                           channels="1234",
-                                                           file="This is a fun picture of the world",
-                                                           filename="this-is-whats-happening.png",
-                                                           as_user=True)
+        calls = [call("files.upload",
+                      channels="1234",
+                      file="This is a fun picture of the world 1",
+                      filename="this-is-whats-happening.png",
+                      as_user=True),
+                 call("files.upload",
+                      channels="1234",
+                      file="This is a fun picture of the world 2",
+                      filename="this-is-whats-happening.png",
+                      as_user=True),
+                 call("files.upload",
+                      channels="1234",
+                      file="This is a fun picture of the world 3",
+                      filename="this-is-whats-happening.png",
+                      as_user=True),
+                 call("files.upload",
+                      channels="1234",
+                      file="This is a fun picture of the world 4",
+                      filename="this-is-whats-happening.png",
+                      as_user=True)]
+
+        self.mock_slack_client.api_call.assert_has_calls(calls)
+        self.assertEqual(self.mock_slack_client.api_call.call_count, 4)
+
+        mock_time.assert_has_calls([call(0.5), call(0.5), call(0.5), call(0.5)])
