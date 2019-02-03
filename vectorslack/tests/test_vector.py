@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 
 import anki_vector
 from parameterized import parameterized
@@ -92,7 +92,14 @@ class TestVector(unittest.TestCase):
 
         vector.start(mock_slack, mock_vector)
 
+        handle_command_calls = [
+            call("say hi", "C2147483705", "vectorbot", mock_slack, mock_command_parser),
+            call("make heart eyes", "A45234", "vectorbot", mock_slack, mock_command_parser)
+
+        ]
         self.assertEqual(mock_handle_command.call_count, 2)
+        mock_handle_command.assert_has_calls(handle_command_calls)
+
         mock_create_command.assert_called_with(mock_vector, mock_slack)
         mock_slack.api_call.assert_called_with("auth.test")
 
