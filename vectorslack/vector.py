@@ -6,11 +6,14 @@ from vectorslack.command_parser import CommandParser, SUPPORTED_COMMANDS
 RTM_READ_DELAY = 1
 
 
-def start(botname, slack_client, robot):
+def start(slack_client, robot):
     command_parser = create_command_parser(robot, slack_client)
+    bot_details = slack_client.api_call("auth.test")
+    bot_id = bot_details["user_id"]
+    bot_name = bot_details["user"]
     if slack_client.rtm_connect():
         while slack_connected(slack_client) is True:
-            parse_events(botname, slack_client, command_parser)
+            parse_events(bot_id, bot_name, slack_client, command_parser)
             time.sleep(RTM_READ_DELAY)
     else:
         print("Connection Failed")
@@ -24,10 +27,10 @@ def slack_connected(slack_client):
     return slack_client.server.connected
 
 
-def parse_events(botname, slack_client, command_parser):
-    events = parse_bot_commands(slack_client.rtm_read(), botname)
+def parse_events(bot_id, bot_name, slack_client, command_parser):
+    events = parse_bot_commands(slack_client.rtm_read(), bot_id)
     for event in events:
-        handle_command(event[0], event[1], botname, slack_client, command_parser)
+        handle_command(event[0], event[1], bot_name, slack_client, command_parser)
 
 
 def parse_bot_commands(slack_events, botname):
@@ -49,10 +52,10 @@ def parse_direct_mention(message_text, botname):
 
 
 def get_mention_regex(botname):
-    return "^@(%s)(.*)" % botname
+    return "^<@(%s)>(.*)" % botname
 
 
-def handle_command(message, channel, botname, slack_client, command_parser):
+def handle_command(message, channel, bot_name, slack_client, command_parser):
     default_response = "I'm not sure what you mean."
 
     response = None
@@ -64,7 +67,7 @@ def handle_command(message, channel, botname, slack_client, command_parser):
         message_contents = lower_case_message.replace(command, '', 1).strip()
 
         getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
-        response = "%s is a go go" % botname
+        response = "%s is a go go" % bot_name
     except StopIteration as e:
         print("Failed to parse command " + message)
 

@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, patch, call
 
 import anki_vector
 from parameterized import parameterized
@@ -13,7 +13,7 @@ events = [
         "type": "message",
         "channel": "C2147483705",
         "user": "U2147483697",
-        "text": "@VectorBot say hi",
+        "text": "<@12345> say hi",
         "ts": "1355517523.000005"
     },
     {
@@ -41,7 +41,7 @@ events = [
         "type": "message",
         "channel": "A45234",
         "user": "U2147483697",
-        "text": "@VectorBot make heart eyes",
+        "text": "<@12345> make heart eyes",
         "ts": "1355517523.000005"
     },
 ]
@@ -50,9 +50,9 @@ events = [
 class TestVector(unittest.TestCase):
 
     @parameterized.expand([
-        ["matches", "@VectorBot go go", "VectorBot", "go go"],
-        ["does NOT matche", "@vector go go", None, None],
-        ["does match case insensitive", "@vectorbot go go", "vectorbot", "go go"],
+        ["matches", "<@VectorBot> go go", "VectorBot", "go go"],
+        ["does NOT matche", "<@vector> go go", None, None],
+        ["does match case insensitive", "<@vectorbot> go go", "vectorbot", "go go"],
     ])
     def test_parses_direct_mention_when_botname(self, name, message, expected_user, expected_message):
         user, message = vector.parse_direct_mention(message, "VectorBot")
@@ -71,7 +71,7 @@ class TestVector(unittest.TestCase):
             )
         ]
 
-        actual_events = vector.parse_bot_commands(events, "VectorBot")
+        actual_events = vector.parse_bot_commands(events, "12345")
 
         self.assertListEqual(actual_events, expected_events)
 
@@ -83,16 +83,25 @@ class TestVector(unittest.TestCase):
         mock_slack = Mock(spec=SlackClient)
         mock_slack_connected.side_effect = [True, False]
         mock_slack.rtm_read.return_value = events
+        mock_slack.api_call.return_value = {"user_id": "12345", "user": "vectorbot"}
 
         mock_command_parser = Mock(spec=CommandParser)
         mock_create_command.return_value = mock_command_parser
 
         mock_vector = Mock(spec=anki_vector.Robot)
 
-        vector.start("VectorBot", mock_slack, mock_vector)
+        vector.start(mock_slack, mock_vector)
 
+        handle_command_calls = [
+            call("say hi", "C2147483705", "vectorbot", mock_slack, mock_command_parser),
+            call("make heart eyes", "A45234", "vectorbot", mock_slack, mock_command_parser)
+
+        ]
         self.assertEqual(mock_handle_command.call_count, 2)
+        mock_handle_command.assert_has_calls(handle_command_calls)
+
         mock_create_command.assert_called_with(mock_vector, mock_slack)
+        mock_slack.api_call.assert_called_with("auth.test")
 
     def test_handle_command_say(self):
         mock_command_parser = Mock(spec=CommandParser)
