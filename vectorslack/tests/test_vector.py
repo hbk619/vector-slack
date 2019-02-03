@@ -124,6 +124,14 @@ class TestVector(unittest.TestCase):
 
         mock_command_parser.whats_going_on.assert_called_with(channel="1234", command="")
 
+    def test_handle_command_whats_going_on_case_insensitive(self):
+        mock_command_parser = Mock(spec=CommandParser)
+        mock_slack = Mock(spec=SlackClient)
+
+        vector.handle_command("Whats going on", "1234", "vectorbot", mock_slack, mock_command_parser)
+
+        mock_command_parser.whats_going_on.assert_called_with(channel="1234", command="")
+
     def test_handle_command_invalid_posts_to_slack(self):
         mock_command_parser = Mock(spec=CommandParser)
         mock_slack = Mock(spec=SlackClient)
