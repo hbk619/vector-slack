@@ -3,7 +3,7 @@ import os
 
 import time
 from PIL import Image
-from anki_vector import screen
+from anki_vector import screen, behavior
 from anki_vector.util import degrees
 
 DEFAULT_IMAGE_TIME = 4.0  # seconds
@@ -61,6 +61,12 @@ class CommandParser:
         top = y * 96
         bottom = (y + 1) * 96
         return bottom, left, right, top
+
+    def giggle(self, **kwargs):
+        self.robot.anim.play_animation('anim_eyecontact_giggle_01_head_angle_20')
+
+    def fireworks(self, **kwargs):
+        self.robot.anim.play_animation('anim_holiday_hny_fireworks_01')
 
     def whats_going_on(self, **kwargs):
         self.robot.behavior.drive_off_charger()

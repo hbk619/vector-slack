@@ -4,7 +4,7 @@ from parameterized import parameterized
 
 import anki_vector
 from PIL import Image
-from anki_vector import screen, camera, behavior
+from anki_vector import screen, camera, behavior, animation
 from slackclient import SlackClient
 
 from vectorslack.command_parser import CommandParser
@@ -17,6 +17,7 @@ class TestSay(unittest.TestCase):
         self.mock_robot.screen = Mock(spec=screen.ScreenComponent)
         self.mock_robot.camera = Mock(spec=camera.CameraComponent)
         self.mock_robot.behavior = Mock(spec=behavior.BehaviorComponent)
+        self.mock_robot.anim = Mock(spec=animation.AnimationComponent)
         self.mock_slack_client = Mock(spec=SlackClient)
         self.parser = CommandParser(self.mock_robot, self.mock_slack_client)
 
@@ -125,6 +126,18 @@ class TestSay(unittest.TestCase):
         self.assertEqual(self.mock_slack_client.api_call.call_count, 4)
 
         mock_time.assert_has_calls([call(0.5), call(0.5), call(0.5), call(0.5)])
+
+    def test_giggle(self):
+
+        self.parser.giggle()
+
+        self.mock_robot.anim.play_animation.assert_called_with('anim_eyecontact_giggle_01_head_angle_20')
+
+    def test_fireworks(self):
+
+        self.parser.fireworks()
+
+        self.mock_robot.anim.play_animation.assert_called_with('anim_holiday_hny_fireworks_01')
 
     @parameterized.expand([
         ["zeros", 0, 0, 96, 0, 184, 0],
