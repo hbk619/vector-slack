@@ -45,3 +45,8 @@ Python 3.6 (for Vector)
 Create a PNG sprite sheet, each sprite is 184 in width, 96 in height. Two rows of five and place in
 
     vectorslack/images
+
+## Images
+
+Any images you want to use with the "show" command should go in vectorslack/images and be 184 pixels wide and 94 pixels
+high
