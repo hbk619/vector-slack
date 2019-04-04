@@ -50,13 +50,17 @@ class CommandParser:
         for _ in range(3):
             for y in range(2):
                 for x in range(5):
-                    left = x * 184
-                    right = (x+1) * 184
-                    top = y * 96
-                    bottom = (y+1) * 96
+                    bottom, left, right, top = self.get_crop_coordinates(x, y)
                     image = sheet.crop((left, top, right, bottom))
                     screen_data = screen.convert_image_to_screen_data(image)
                     self.robot.screen.set_screen_with_image_data(screen_data, duration or DEFAULT_IMAGE_TIME)
+
+    def get_crop_coordinates(self, x, y):
+        left = x * 184
+        right = (x + 1) * 184
+        top = y * 96
+        bottom = (y + 1) * 96
+        return bottom, left, right, top
 
     def whats_going_on(self, **kwargs):
         self.robot.behavior.drive_off_charger()

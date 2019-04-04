@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import Mock, patch, call
+from parameterized import parameterized
 
 import anki_vector
 from PIL import Image
@@ -23,6 +24,33 @@ class TestSay(unittest.TestCase):
         self.parser.say(command="hey mario!")
 
         self.mock_robot.say_text.assert_called_with("hey mario!")
+
+    @patch('vectorslack.command_parser.screen.convert_image_to_screen_data')
+    @patch('PIL.Image.open')
+    @patch('os.path.realpath', return_value="test/dir/file.png")
+    @patch('os.path.dirname', return_value="test/dir/file.png")
+    def test_play(self, mocked_dirname, mock_realpath, mock_open, mock_convert_image):
+        mock_image = Mock(spec=Image.Image)
+        mock_images = []
+        expected_calls = []
+        for _ in range(30):
+            image = Mock(spec=Image.Image)
+            mock_images.append(image)
+            expected_calls.append(call(image))
+
+        mock_image.crop.side_effect = mock_images
+        mock_open.return_value = mock_image
+        image_bytes = bytes()
+        mock_convert_image.return_value = image_bytes
+
+        self.parser.play(command="parrot")
+
+        self.assertEqual(mock_image.crop.call_count, 30)
+
+        mock_convert_image.assert_has_calls(expected_calls)
+
+        self.mock_robot.screen.set_screen_with_image_data.assert_called_with(image_bytes, 4.0)
+        self.assertEqual(self.mock_robot.screen.set_screen_with_image_data.call_count, 30)
 
     @patch('vectorslack.command_parser.screen.convert_image_to_screen_data')
     @patch('PIL.Image.open')
@@ -97,3 +125,17 @@ class TestSay(unittest.TestCase):
         self.assertEqual(self.mock_slack_client.api_call.call_count, 4)
 
         mock_time.assert_has_calls([call(0.5), call(0.5), call(0.5), call(0.5)])
+
+    @parameterized.expand([
+        ["zeros", 0, 0, 96, 0, 184, 0],
+        ["ones", 1, 1, 192, 184, 368, 96],
+        ["twos", 2, 2, 288, 368, 552, 192],
+    ])
+    def test_get_crop_coordinates(self, name, x, y, expected_bottom, expected_left, expected_right, expected_top):
+
+        bottom, left, right, top = self.parser.get_crop_coordinates(x, y)
+
+        self.assertEqual(bottom, expected_bottom)
+        self.assertEqual(top, expected_top)
+        self.assertEqual(left, expected_left)
+        self.assertEqual(right, expected_right)
