@@ -65,7 +65,8 @@ class TestVector(unittest.TestCase):
     def test_parse_command(self, mock_direct_mention, mock_handle_command):
         payload = {
             'text': '<@VectorBot> say hi',
-            'channel': '1234'
+            'channel': '1234',
+            'ts': '999.999'
         }
         mock_web_client = Mock(spec=WebClient)
         mock_command_parser = Mock(spec=CommandParser)
@@ -79,7 +80,7 @@ class TestVector(unittest.TestCase):
         vector.parse_bot_commands(data=payload)
 
         mock_direct_mention.assert_called_with('<@VectorBot> say hi', 'VectorBot')
-        mock_handle_command.assert_called_with('say hi', '1234', 'Vector', mock_web_client, mock_command_parser)
+        mock_handle_command.assert_called_with('say hi', '1234', '999.999', 'Vector', mock_web_client, mock_command_parser)
 
     @patch('vectorslack.vector.create_command_parser')
     def test_start(self, mock_create_command):
@@ -102,21 +103,21 @@ class TestVector(unittest.TestCase):
         mock_command_parser = Mock(spec=CommandParser)
         mock_web_client = Mock(spec=WebClient)
 
-        vector.handle_command("say hello there", "1234", "vectorbot", mock_web_client, mock_command_parser)
+        vector.handle_command("say hello there", "1234", "9999.000", "vectorbot", mock_web_client, mock_command_parser)
 
         mock_command_parser.say.assert_called_with(channel="1234", command="hello there")
 
-        mock_web_client.api_call.assert_called_with(
-            "chat.postMessage",
+        mock_web_client.chat_postMessage.assert_called_with(
             channel="1234",
-            text="vectorbot is a go go"
+            text="vectorbot is a go go",
+            thread_ts="9999.000"
         )
 
     def test_handle_command_move(self):
         mock_command_parser = Mock(spec=CommandParser)
         mock_web_client = Mock(spec=WebClient)
 
-        vector.handle_command("move forward", "1234", "vectorbot", mock_web_client, mock_command_parser)
+        vector.handle_command("move forward", "1234", "9999.000", "vectorbot", mock_web_client, mock_command_parser)
 
         mock_command_parser.move.assert_called_with(channel="1234", command="forward")
 
@@ -124,7 +125,7 @@ class TestVector(unittest.TestCase):
         mock_command_parser = Mock(spec=CommandParser)
         mock_web_client = Mock(spec=WebClient)
 
-        vector.handle_command("whats going on", "1234", "vectorbot", mock_web_client, mock_command_parser)
+        vector.handle_command("whats going on", "1234", "9999.000", "vectorbot", mock_web_client, mock_command_parser)
 
         mock_command_parser.whats_going_on.assert_called_with(channel="1234", command="")
 
@@ -132,7 +133,7 @@ class TestVector(unittest.TestCase):
         mock_command_parser = Mock(spec=CommandParser)
         mock_web_client = Mock(spec=WebClient)
 
-        vector.handle_command("Whats going on", "1234", "vectorbot", mock_web_client, mock_command_parser)
+        vector.handle_command("Whats going on", "1234", "9999.000", "vectorbot", mock_web_client, mock_command_parser)
 
         mock_command_parser.whats_going_on.assert_called_with(channel="1234", command="")
 
@@ -140,12 +141,12 @@ class TestVector(unittest.TestCase):
         mock_command_parser = Mock(spec=CommandParser)
         mock_web_client = Mock(spec=WebClient)
 
-        vector.handle_command("utter garbage", "1234", "vectorbot", mock_web_client, mock_command_parser)
+        vector.handle_command("utter garbage", "1234", "9999.000", "vectorbot", mock_web_client, mock_command_parser)
 
-        mock_web_client.api_call.assert_called_with(
-            "chat.postMessage",
+        mock_web_client.chat_postMessage.assert_called_with(
             channel="1234",
-            text="I'm not sure what you mean."
+            text="I'm not sure what you mean.",
+            thread_ts="9999.000"
         )
 
 

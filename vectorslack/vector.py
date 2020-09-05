@@ -33,7 +33,7 @@ def parse_bot_commands(**payload):
     data = payload['data']
     user_id, message = parse_direct_mention(data["text"], bot_id)
     if user_id == bot_id:
-        handle_command(message, data["channel"], bot_name, web_client, command_parser)
+        handle_command(message, data["channel"], data['ts'], bot_name, web_client, command_parser)
 
 
 def parse_direct_mention(message_text, bot_name):
@@ -47,7 +47,7 @@ def get_mention_regex(bot_name):
     return "^<@(%s)>(.*)" % bot_name
 
 
-def handle_command(message, channel, bot_name, slack_client, command_parser):
+def handle_command(message, channel, ts, bot_name, slack_client, command_parser):
     default_response = "I'm not sure what you mean."
 
     response = None
@@ -63,8 +63,8 @@ def handle_command(message, channel, bot_name, slack_client, command_parser):
     except StopIteration as e:
         print("Failed to parse command " + message)
 
-    slack_client.api_call(
-        "chat.postMessage",
+    slack_client.chat_postMessage(
         channel=channel,
-        text=response or default_response
+        text=response or default_response,
+        thread_ts=ts
     )

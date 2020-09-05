@@ -93,7 +93,9 @@ class TestSay(unittest.TestCase):
                                                 "This is a fun picture of the world 3",
                                                 "This is a fun picture of the world 4"]
         mock_image = Mock(spec=Image.Image)
-        self.mock_robot.camera.latest_image = mock_image
+        mock_camera_image = Mock(spec=camera.CameraImage)
+        mock_camera_image.raw_image = mock_image
+        self.mock_robot.camera.latest_image = mock_camera_image
 
         self.parser.whats_going_on(channel="1234")
 
@@ -101,29 +103,25 @@ class TestSay(unittest.TestCase):
 
         mock_image.save.assert_called_with(mock_bytes_io(), "PNG")
 
-        calls = [call("files.upload",
-                      channels="1234",
+        calls = [call(channels="1234",
                       file="This is a fun picture of the world 1",
                       filename="this-is-whats-happening.png",
                       as_user=True),
-                 call("files.upload",
-                      channels="1234",
+                 call(channels="1234",
                       file="This is a fun picture of the world 2",
                       filename="this-is-whats-happening.png",
                       as_user=True),
-                 call("files.upload",
-                      channels="1234",
+                 call(channels="1234",
                       file="This is a fun picture of the world 3",
                       filename="this-is-whats-happening.png",
                       as_user=True),
-                 call("files.upload",
-                      channels="1234",
+                 call(channels="1234",
                       file="This is a fun picture of the world 4",
                       filename="this-is-whats-happening.png",
                       as_user=True)]
 
-        self.mock_slack_client.api_call.assert_has_calls(calls)
-        self.assertEqual(self.mock_slack_client.api_call.call_count, 4)
+        self.mock_slack_client.files_upload.assert_has_calls(calls)
+        self.assertEqual(self.mock_slack_client.files_upload.call_count, 4)
 
         mock_time.assert_has_calls([call(0.5), call(0.5), call(0.5), call(0.5)])
 

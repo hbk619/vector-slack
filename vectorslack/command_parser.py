@@ -72,21 +72,24 @@ class CommandParser:
 
     def whats_going_on(self, **kwargs):
         self.robot.behavior.drive_off_charger()
+        self.robot.camera.init_camera_feed()
 
         for _ in range(4):
             time.sleep(0.5)
 
             content = io.BytesIO()
             image = self.robot.camera.latest_image
-            image.save(content, "PNG")
+            image.raw_image.save(content, "PNG")
 
-            self.slack_client.api_call("files.upload",
+            self.slack_client.files_upload(
                                        channels=kwargs['channel'],
                                        file=content.getvalue(),
                                        filename="this-is-whats-happening.png",
                                        as_user=True)
 
             self.robot.behavior.turn_in_place(degrees(90))
+
+        self.robot.camera.close_camera_feed()
 
 
 SUPPORTED_COMMANDS = {item.replace('_', ' '): item for item in dir(CommandParser) if not item.startswith('__')}.items()
