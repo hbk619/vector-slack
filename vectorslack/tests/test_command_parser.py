@@ -5,7 +5,7 @@ from parameterized import parameterized
 import anki_vector
 from PIL import Image
 from anki_vector import screen, camera, behavior, animation
-from slackclient import SlackClient
+from slack import WebClient
 
 from vectorslack.command_parser import CommandParser
 
@@ -18,13 +18,13 @@ class TestSay(unittest.TestCase):
         self.mock_robot.camera = Mock(spec=camera.CameraComponent)
         self.mock_robot.behavior = Mock(spec=behavior.BehaviorComponent)
         self.mock_robot.anim = Mock(spec=animation.AnimationComponent)
-        self.mock_slack_client = Mock(spec=SlackClient)
+        self.mock_slack_client = Mock(spec=WebClient)
         self.parser = CommandParser(self.mock_robot, self.mock_slack_client)
 
     def test_say(self):
         self.parser.say(command="hey mario!")
 
-        self.mock_robot.say_text.assert_called_with("hey mario!")
+        self.mock_robot.behavior.say_text.assert_called_with("hey mario!")
 
     @patch('vectorslack.command_parser.screen.convert_image_to_screen_data')
     @patch('PIL.Image.open')

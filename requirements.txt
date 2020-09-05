@@ -1,4 +1,4 @@
-slackclient==v1.3.0
-anki_vector==v0.5.1
+slackclient==v2.8.2
+anki_vector==v0.6.0
 parameterized==v0.6.1
 Pillow>=3.3

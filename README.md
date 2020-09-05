@@ -20,6 +20,12 @@ Python 3.6 (for Vector)
     sudo apt-get update
     sudo apt-get install python3.6
 
+### Slack token
+
+You will need a [classic  slack app](https://api.slack.com/rtm#classic) with a single scope of 'bot'. Ignore the 
+"there are new permissions!" warnings. Add a bot user via App Home on the left, then install to your workspace and take
+the token beginning with xoxb
+
 ## Developing
     
     python3.6 -m venv .

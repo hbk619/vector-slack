@@ -15,7 +15,7 @@ class CommandParser:
         self.slack_client = slack_client
 
     def say(self, **kwargs):
-        self.robot.say_text(kwargs['command'])
+        self.robot.behavior.say_text(kwargs['command'])
 
     def move(self):
         self.robot.motors.set_wheel_motors()
@@ -54,6 +54,8 @@ class CommandParser:
                     image = sheet.crop((left, top, right, bottom))
                     screen_data = screen.convert_image_to_screen_data(image)
                     self.robot.screen.set_screen_with_image_data(screen_data, duration or DEFAULT_IMAGE_TIME)
+
+        self.giggle()
 
     def get_crop_coordinates(self, x, y):
         left = x * 184
