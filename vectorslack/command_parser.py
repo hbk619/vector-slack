@@ -47,6 +47,8 @@ class CommandParser:
         except (IndexError, TypeError):
             print("No duration specified for image. Message: '%s', using default" % command)
 
+        self.say(command='I can %s' % (split_command[0]))
+
         for _ in range(3):
             for y in range(2):
                 for x in range(5):

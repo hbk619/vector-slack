@@ -50,6 +50,7 @@ class TestSay(unittest.TestCase):
 
         mock_convert_image.assert_has_calls(expected_calls)
 
+        self.mock_robot.behavior.say_text.assert_called_with('I can parrot')
         self.mock_robot.screen.set_screen_with_image_data.assert_called_with(image_bytes, 4.0)
         self.assertEqual(self.mock_robot.screen.set_screen_with_image_data.call_count, 30)
 
