@@ -1,11 +1,11 @@
 import os
 from vectorslack import vector
-from slackclient import SlackClient
 import anki_vector
+from slack import RTMClient, WebClient
 
+webclient = WebClient(token=os.environ['SLACK_TOKEN'])
+rtm_client = RTMClient(token=os.environ['SLACK_TOKEN'])
 
 if __name__ == '__main__':
-    slack_client = SlackClient(os.environ['SLACK_TOKEN'])
-
-    with anki_vector.Robot(os.environ['VECTOR_SERIAL'], enable_camera_feed=True) as robot:
-        vector.start(slack_client, robot)
+    with anki_vector.Robot(os.environ['VECTOR_SERIAL'], behavior_control_level=None) as robot:
+        vector.start(rtm_client, webclient, robot)
