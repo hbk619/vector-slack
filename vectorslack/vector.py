@@ -47,13 +47,21 @@ def get_mention_regex(bot_name):
     return "^<@(%s)>(.*)" % bot_name
 
 
+def gain_control(robot):
+    robot.conn.request_control().result()
+
+
+def release_control(robot):
+    robot.conn.release_control().result()
+
+
 def handle_command(message, channel, ts, bot_name, slack_client, command_parser):
     default_response = "I'm not sure what you mean."
 
     response = None
     lower_case_message = message.lower()
     try:
-        command_parser.robot.conn.request_control().result()
+        gain_control(command_parser.robot)
         command, attribute_name = next(
             (key, value) for key, value in SUPPORTED_COMMANDS if lower_case_message.startswith(key))
 
@@ -61,18 +69,19 @@ def handle_command(message, channel, ts, bot_name, slack_client, command_parser)
 
         getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
         response = "%s is a go go" % bot_name
-        command_parser.robot.conn.release_control().result()
+        release_control(command_parser.robot)
     except StopIteration as e:
         print("Failed to parse command " + message)
-        command_parser.robot.conn.release_control().result()
+        release_control(command_parser.robot)
 
     except Exception as e:
         print("Failed to trigger vector " + message)
         print(e)
-        command_parser.robot.conn.release_control().result()
+        release_control(command_parser.robot)
 
     slack_client.chat_postMessage(
         channel=channel,
         text=response or default_response,
         thread_ts=ts
     )
+
