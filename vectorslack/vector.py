@@ -53,6 +53,7 @@ def handle_command(message, channel, ts, bot_name, slack_client, command_parser)
     response = None
     lower_case_message = message.lower()
     try:
+        command_parser.robot.conn.request_control().result()
         command, attribute_name = next(
             (key, value) for key, value in SUPPORTED_COMMANDS if lower_case_message.startswith(key))
 
@@ -60,8 +61,15 @@ def handle_command(message, channel, ts, bot_name, slack_client, command_parser)
 
         getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
         response = "%s is a go go" % bot_name
+        command_parser.robot.conn.release_control().result()
     except StopIteration as e:
         print("Failed to parse command " + message)
+        command_parser.robot.conn.release_control().result()
+
+    except Exception as e:
+        print("Failed to trigger vector " + message)
+        print(e)
+        command_parser.robot.conn.release_control().result()
 
     slack_client.chat_postMessage(
         channel=channel,
