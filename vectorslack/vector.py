@@ -1,6 +1,8 @@
 import re
+import time
 
 from slack import RTMClient
+
 from vectorslack.command_parser import CommandParser, SUPPORTED_COMMANDS
 
 RTM_READ_DELAY = 1
@@ -33,7 +35,7 @@ def parse_bot_commands(**payload):
     data = payload['data']
     user_id, message = parse_direct_mention(data["text"], bot_id)
     if user_id == bot_id:
-        handle_command(message, data["channel"], data['ts'], bot_name, web_client, command_parser)
+        handle_command(message, data["channel"], data['ts'], web_client, command_parser)
 
 
 def parse_direct_mention(message_text, bot_name):
@@ -49,13 +51,14 @@ def get_mention_regex(bot_name):
 
 def gain_control(robot):
     robot.conn.request_control().result()
+    time.sleep(0.5)
 
 
 def release_control(robot):
-    robot.conn.release_control().result()
+    robot.conn.release_control(timeout=5).result()
 
 
-def handle_command(message, channel, ts, bot_name, slack_client, command_parser):
+def handle_command(message, channel, ts, slack_client, command_parser):
     default_response = "I'm not sure what you mean."
 
     response = None
@@ -68,16 +71,18 @@ def handle_command(message, channel, ts, bot_name, slack_client, command_parser)
         message_contents = lower_case_message.replace(command, '', 1).strip()
 
         getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
-        response = "%s is a go go" % bot_name
-        release_control(command_parser.robot)
+        response = "I did as you asked"
     except StopIteration as e:
-        print("Failed to parse command " + message)
-        release_control(command_parser.robot)
-
+        print("Failed to parse command: " + message)
     except Exception as e:
-        print("Failed to trigger vector " + message)
+        print("Failed to trigger vector for command: " + message)
         print(e)
+
+    try:
         release_control(command_parser.robot)
+    except Exception as e:
+        print("Failed to release vector for command: " + message)
+        print(e)
 
     slack_client.chat_postMessage(
         channel=channel,
