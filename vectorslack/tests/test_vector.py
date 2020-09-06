@@ -82,7 +82,7 @@ class TestVector(unittest.TestCase):
         vector.parse_bot_commands(data=payload)
 
         mock_direct_mention.assert_called_with('<@VectorBot> say hi', 'VectorBot')
-        mock_handle_command.assert_called_with('say hi', '1234', '999.999', 'Vector', self.mock_web_client, self.mock_command_parser)
+        mock_handle_command.assert_called_with('say hi', '1234', '999.999', self.mock_web_client, self.mock_command_parser)
 
     @patch('vectorslack.vector.create_command_parser')
     def test_start(self, mock_create_command):
@@ -103,7 +103,7 @@ class TestVector(unittest.TestCase):
     @patch('vectorslack.vector.release_control')
     def test_handle_command_say(self, mock_release_control, mock_gain_control):
 
-        vector.handle_command("say hello there", "1234", "9999.000", "vectorbot", self.mock_web_client, self.mock_command_parser)
+        vector.handle_command("say hello there", "1234", "9999.000", self.mock_web_client, self.mock_command_parser)
 
         self.mock_command_parser.say.assert_called_with(channel="1234", command="hello there")
 
@@ -114,7 +114,7 @@ class TestVector(unittest.TestCase):
         self.assertEqual(mock_release_control.call_count, 1)
         self.mock_web_client.chat_postMessage.assert_called_with(
             channel="1234",
-            text="vectorbot is a go go",
+            text="I did as you asked",
             thread_ts="9999.000"
         )
 
@@ -122,7 +122,7 @@ class TestVector(unittest.TestCase):
     @patch('vectorslack.vector.release_control')
     def test_handle_command_move(self, mock_release_control, mock_gain_control):
 
-        vector.handle_command("move forward", "1234", "9999.000", "vectorbot", self.mock_web_client, self.mock_command_parser)
+        vector.handle_command("move forward", "1234", "9999.000", self.mock_web_client, self.mock_command_parser)
 
         self.mock_command_parser.move.assert_called_with(channel="1234", command="forward")
 
@@ -130,7 +130,7 @@ class TestVector(unittest.TestCase):
     @patch('vectorslack.vector.release_control')
     def test_handle_command_whats_going_on(self, mock_release_control, mock_gain_control):
 
-        vector.handle_command("whats going on", "1234", "9999.000", "vectorbot", self.mock_web_client, self.mock_command_parser)
+        vector.handle_command("whats going on", "1234", "9999.000", self.mock_web_client, self.mock_command_parser)
 
         self.mock_command_parser.whats_going_on.assert_called_with(channel="1234", command="")
 
@@ -138,7 +138,7 @@ class TestVector(unittest.TestCase):
     @patch('vectorslack.vector.release_control')
     def test_handle_command_whats_going_on_case_insensitive(self, mock_release_control, mock_gain_control):
 
-        vector.handle_command("Whats going on", "1234", "9999.000", "vectorbot", self.mock_web_client, self.mock_command_parser)
+        vector.handle_command("Whats going on", "1234", "9999.000", self.mock_web_client, self.mock_command_parser)
 
         self.mock_command_parser.whats_going_on.assert_called_with(channel="1234", command="")
 
@@ -146,7 +146,7 @@ class TestVector(unittest.TestCase):
     @patch('vectorslack.vector.release_control')
     def test_handle_command_invalid_posts_to_slack(self, mock_release_control, mock_gain_control):
 
-        vector.handle_command("utter garbage", "1234", "9999.000", "vectorbot", self.mock_web_client, self.mock_command_parser)
+        vector.handle_command("utter garbage", "1234", "9999.000", self.mock_web_client, self.mock_command_parser)
 
         self.mock_web_client.chat_postMessage.assert_called_with(
             channel="1234",

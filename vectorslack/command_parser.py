@@ -27,6 +27,8 @@ class CommandParser:
         image = Image.open('%s/images/%s.png' % (dir_path, split_command[0]))
         duration = None
 
+        self.say(command='Here is a %s' % (split_command[0]))
+
         try:
             duration = float(split_command[2])
         except (IndexError, TypeError):

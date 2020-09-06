@@ -69,6 +69,7 @@ class TestSay(unittest.TestCase):
         mock_convert_image.assert_called_with(mock_image)
 
         self.mock_robot.screen.set_screen_with_image_data.assert_called_with(image_bytes, 4.0)
+        self.mock_robot.behavior.say_text.assert_called_with('Here is a heart')
 
     @patch('vectorslack.command_parser.screen.convert_image_to_screen_data')
     @patch('PIL.Image.open')
