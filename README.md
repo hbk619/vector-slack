@@ -1,6 +1,9 @@
 # WORK IN PROGRESS
 
-Integrate Slack with Anki's Vector
+Integrate Slack with Digital Dream labs (Anki's) Vector.
+This assumes you are connected to Digital Dream lab's cloud service, if you have the escape pod you
+will need to use https://github.com/cyb3rdog/vector-python-sdk/ (which I do so I'm unable to test this
+with the latest protobuf update I'm afraid!)
 
 ## Possible commands
 
@@ -14,11 +17,11 @@ Integrate Slack with Anki's Vector
 
 ## Requirements
 
-Python 3.6 (for Vector)
+Python 3.8 (for Protobuf, which Vector needs)
 
     sudo add-apt-repository ppa:deadsnakes/ppa
     sudo apt-get update
-    sudo apt-get install python3.6
+    sudo apt-get install python3.8
 
 ### Slack token
 
@@ -28,7 +31,7 @@ the token beginning with xoxb
 
 ## Developing
     
-    python3.6 -m venv .
+    python3.8 -m venv .
     source venv/bin/activate
     pip install -r requirements.txt
     pip install -e .
@@ -41,7 +44,7 @@ the token beginning with xoxb
 
     docker build .
     docker run -v vector_config:/root/.anki_vector -ti <image id> /bin/bash
-    python3.6 -m anki_vector.configure
+    python3.8 -m anki_vector.configure
     <enter all your details>
     exit
     docker run -v vector_config:/root/.anki_vector -e SLACK_TOKEN -e VECTOR_SERIAL <image id>
