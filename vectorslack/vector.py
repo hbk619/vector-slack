@@ -72,7 +72,7 @@ def handle_command(message, channel, ts, slack_client, command_parser):
 
         getattr(command_parser, attribute_name)(command=message_contents, channel=channel)
         response = "I did as you asked"
-    except StopIteration as e:
+    except StopIteration:
         print("Failed to parse command: " + message)
     except Exception as e:
         print("Failed to trigger vector for command: " + message)
@@ -89,4 +89,3 @@ def handle_command(message, channel, ts, slack_client, command_parser):
         text=response or default_response,
         thread_ts=ts
     )
-

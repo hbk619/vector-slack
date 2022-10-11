@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import Mock, patch, call
+from unittest.mock import Mock, patch
 
 import anki_vector
 from parameterized import parameterized
@@ -82,7 +82,8 @@ class TestVector(unittest.TestCase):
         vector.parse_bot_commands(data=payload)
 
         mock_direct_mention.assert_called_with('<@VectorBot> say hi', 'VectorBot')
-        mock_handle_command.assert_called_with('say hi', '1234', '999.999', self.mock_web_client, self.mock_command_parser)
+        mock_handle_command.assert_called_with('say hi', '1234', '999.999', self.mock_web_client,
+                                               self.mock_command_parser)
 
     @patch('vectorslack.vector.create_command_parser')
     def test_start(self, mock_create_command):

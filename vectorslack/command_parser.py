@@ -3,7 +3,7 @@ import os
 
 import time
 from PIL import Image
-from anki_vector import screen, behavior
+from anki_vector import screen
 from anki_vector.util import degrees
 
 DEFAULT_IMAGE_TIME = 4.0  # seconds
